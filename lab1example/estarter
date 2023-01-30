@@ -1,2 +1,2 @@
 
-java mcgui.Main ExampleCaster $1 localhostsetup
+java mcgui.Main lab1example.ExampleCaster $1 localhostsetup
