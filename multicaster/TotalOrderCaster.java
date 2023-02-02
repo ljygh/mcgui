@@ -70,15 +70,15 @@ public class TotalOrderCaster {
             // mcui.debug(multiMessage.text);
             // mcui.debug(String.valueOf(multiMessage.getMessageType()));
             if(multiMessage.getMessageType() == false){
-                mcui.debug("Add normal msg to msg map");
                 String msgIdentifier = String.valueOf(multiMessage.getSender()) + String.valueOf(multiMessage.getSequenceNum());
                 msgMap.put(msgIdentifier, multiMessage);
+                mcui.debug("Put msg " + msgIdentifier + " to msg map");
 
                 while(orderQueue.containsKey(msgOrder) && msgMap.containsKey(orderQueue.get(msgOrder))){
                     // deliver message
                     String msgId = orderQueue.get(msgOrder);
                     MultiMessage msg = msgMap.get(msgId);
-                    mcui.deliver(peer, msg.text);
+                    mcui.deliver(msg.getSender(), msg.text);
                     orderQueue.remove(msgOrder);
                     msgMap.remove(msgId);
                     msgOrder ++;
@@ -86,23 +86,39 @@ public class TotalOrderCaster {
                 }
             }
             else{
-                mcui.debug("Add order to order queue");
-                String msgIdentifier = multiMessage.text;
-                int totalOrder = multiMessage.totalOrder;
+                String msgIdentifier = multiMessage.getText();
+                int totalOrder = multiMessage.getTotalOrder();
                 orderQueue.put(totalOrder, msgIdentifier);
-                msgMap.remove(msgIdentifier);
+                mcui.debug("Put " + String.valueOf(totalOrder) + " " + msgIdentifier + " to order queue");
+
+                printMsgMap();
+                printOrderQueue();
 
                 while(orderQueue.containsKey(msgOrder) && msgMap.containsKey(orderQueue.get(msgOrder))){
                     // deliver message
                     String msgId = orderQueue.get(msgOrder);
                     MultiMessage msg = msgMap.get(msgId);
-                    mcui.deliver(peer, msg.text);
+                    mcui.deliver(msg.getSender(), msg.text);
                     orderQueue.remove(msgOrder);
                     msgMap.remove(msgId);
                     msgOrder ++;
                     mcui.debug("Deliver message: " + msg.getSender() + " " + msg.getSequenceNum());
                 }
             }
+        }
+    }
+
+    public void printMsgMap(){
+        mcui.debug("Print msgMap");
+        for (String key : msgMap.keySet()) {
+            mcui.debug(key);
+        }
+    }
+
+    public void printOrderQueue(){
+        mcui.debug("Print order queue");
+        for (Map.Entry<Integer, String> entry : orderQueue.entrySet()) {
+            mcui.debug("Key: " + entry.getKey() + " Value: " + entry.getValue());
         }
     }
 }
