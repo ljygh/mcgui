@@ -16,6 +16,8 @@ public class FIFOCaster{
     Map<Integer, Integer> nextMap;
     Map<Integer, LinkedList<Message>> msgBag;
 
+    TotalOrderCaster totalOrderCaster;
+
     FIFOCaster(int id, int hosts, MulticasterUI mcui, BasicCommunicator bcom){
         this.id = id;
         this.hosts = hosts;
@@ -27,10 +29,13 @@ public class FIFOCaster{
             nextMap.put(i, 0);
         }
         msgBag = new HashMap<>();
+
+        totalOrderCaster = new TotalOrderCaster(id, hosts, mcui, bcom);
     }
 
     public void f_receive(int peer, Message message){
         // put msgs to msgBag in order
+        mcui.debug("");
         mcui.debug("F-Receive messge " + message.getSender() + " " + String.valueOf(((MultiMessage)message).getSequenceNum()));
         mcui.debug("Add messge to msg bag");
         int sender = message.getSender();
@@ -50,13 +55,15 @@ public class FIFOCaster{
             }
         }
 
+        // deliver msg according to nextMap
         LinkedList<Message> msgList = msgBag.get(sender);
         while(msgList.size() > 0 && ((MultiMessage)msgList.getFirst()).getSequenceNum() == nextMap.get(sender)){
-            mcui.deliver(peer, ((MultiMessage)message).text);
+            // mcui.deliver(peer, ((MultiMessage)message).text);
             int current_seq = nextMap.get(sender);
             nextMap.put(sender, current_seq + 1);
             msgList.removeFirst();
             mcui.debug("F-Deliver message: " + sender + " " + ((MultiMessage)message).getSequenceNum());
+            totalOrderCaster.t_receive(peer, message);
         }
         return;
     }

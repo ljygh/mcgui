@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class MultiCaster extends Multicaster {
 
-    int sequenceNum;
+    static int sequenceNum;
     Map<Integer, List<Integer>> deliveredMsgMap;
     FIFOCaster fifoCaster;
 

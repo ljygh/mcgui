@@ -11,11 +11,23 @@ public class MultiMessage extends Message {
         
     String text;
     int sequenceNum;
+
+    boolean messageType; // false for normal message, true for order message
+    int totalOrder;
         
     public MultiMessage(int sender, String text, int sequenceNum) {
         super(sender);
         this.text = text;
         this.sequenceNum = sequenceNum;
+        this.messageType = false;
+    }
+
+    public MultiMessage(int sender, String text, int sequenceNum, boolean messageType, int totalOrder) {
+        super(sender);
+        this.text = text;
+        this.sequenceNum = sequenceNum;
+        this.messageType = messageType;
+        this.totalOrder = totalOrder;
     }
     
     /**
@@ -32,6 +44,14 @@ public class MultiMessage extends Message {
      */
     public int getSequenceNum(){
         return sequenceNum;
+    }
+
+    public boolean getMessageType(){
+        return messageType;
+    }
+
+    public int getTotalOrder(){
+        return totalOrder;
     }
     
     public static final long serialVersionUID = 0;
