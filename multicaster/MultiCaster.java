@@ -16,6 +16,7 @@ public class MultiCaster extends Multicaster {
 
     int sequenceNum;
     Map<Integer, List<Integer>> deliveredMsgMap;
+    FIFOCaster fifoCaster;
 
     /**
      * No initializations needed for this simple one
@@ -23,7 +24,7 @@ public class MultiCaster extends Multicaster {
     public void init() {
         sequenceNum = 0;
         deliveredMsgMap = new HashMap<>();
-        mcui.debug("Init sequence number: " + String.valueOf(sequenceNum));
+        fifoCaster = new FIFOCaster(id, hosts, mcui, bcom);
         mcui.debug("The network has "+hosts+" hosts!");
     }
         
@@ -31,16 +32,8 @@ public class MultiCaster extends Multicaster {
      * The GUI calls this module to multicast a message
      */
     public void cast(String messagetext) {
-        for(int i=0; i < hosts; i++) {
-            /* Sends to everyone except itself */
-            if(i != id) {
-                bcom.basicsend(i, new MultiMessage(id, messagetext, sequenceNum));
-            }
-        }
-
-        mcui.debug("Sent out: \""+messagetext+"\"");
-        mcui.debug("Sequence number of message: " + String.valueOf(sequenceNum));
-        mcui.deliver(id, messagetext, "from myself!");
+        // deliver message
+        // mcui.deliver(id, messagetext, "from myself!");
         if(deliveredMsgMap.containsKey(id))
             deliveredMsgMap.get(id).add(sequenceNum);
         else{
@@ -48,7 +41,19 @@ public class MultiCaster extends Multicaster {
             list.add(sequenceNum);
             deliveredMsgMap.put(id, list);
         }
-        mcui.debug("Deliver message");
+        mcui.debug("R-Deliver message");
+        fifoCaster.f_receive(id, new MultiMessage(id, messagetext, sequenceNum));
+
+        // send out message
+        for(int i=0; i < hosts; i++) {
+            /* Sends to everyone except itself */
+            if(i != id) {
+                bcom.basicsend(i, new MultiMessage(id, messagetext, sequenceNum));
+            }
+        }
+        mcui.debug("Sent out: \""+messagetext+"\"");
+        mcui.debug("Sequence number of message: " + String.valueOf(sequenceNum));
+
         sequenceNum ++;
     }
     
@@ -61,7 +66,7 @@ public class MultiCaster extends Multicaster {
         mcui.debug("Receive message " + String.valueOf(message.getSender()) + " " + String.valueOf(((MultiMessage)message).getSequenceNum()));
         if(!deliveredMsgMap.containsKey(message.getSender()) || 
         !deliveredMsgMap.get(message.getSender()).contains(((MultiMessage)message).getSequenceNum())){
-            mcui.debug("Not delivered");
+            mcui.debug("Not R-delivered");
             // send to all neighbors
             if(message.getSender() != id){
                 for(int i=0; i < hosts; i++) {
@@ -74,7 +79,9 @@ public class MultiCaster extends Multicaster {
             }
 
             // deliver the message and save in map
-            mcui.deliver(peer, ((MultiMessage)message).text);
+            // mcui.deliver(peer, ((MultiMessage)message).text);
+            mcui.debug("R-Deliver message");
+            fifoCaster.f_receive(peer, message);
             if(deliveredMsgMap.containsKey(message.getSender()))
                 deliveredMsgMap.get(message.getSender()).add(((MultiMessage)message).getSequenceNum());
             else{
@@ -82,10 +89,9 @@ public class MultiCaster extends Multicaster {
                 list.add(((MultiMessage)message).getSequenceNum());
                 deliveredMsgMap.put(message.getSender(), list);
             }
-            mcui.debug("Deliver message");
         }
         else
-            mcui.debug("Deliverd");
+            mcui.debug("R-Deliverd");
     }
 
     /**
