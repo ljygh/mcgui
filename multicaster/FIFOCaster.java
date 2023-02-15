@@ -63,12 +63,12 @@ public class FIFOCaster{
         mcui.debug("Next msg num of this sender: " + nextMap.get(sender));
         printMsgBag(sender);
         while(msgList.size() > 0 && ((MultiMessage)msgList.getFirst()).getSequenceNum() == nextMap.get(sender)){
-            mcui.deliver(peer, ((MultiMessage)message).text);
+            // mcui.deliver(peer, ((MultiMessage)message).text);
             int current_seq = nextMap.get(sender);
             nextMap.put(sender, current_seq + 1);
             msgList.removeFirst();
             mcui.debug("F-Deliver message: " + sender + " " + ((MultiMessage)message).getSequenceNum());
-            // totalOrderCaster.t_receive(peer, message);
+            totalOrderCaster.t_receive(message.getSender(), message);
         }
         return;
     }

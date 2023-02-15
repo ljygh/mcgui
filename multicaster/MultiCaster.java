@@ -34,15 +34,15 @@ public class MultiCaster extends Multicaster {
     public void cast(String messagetext) {
         // deliver message
         // mcui.deliver(id, messagetext, "from myself!");
-        if(deliveredMsgMap.containsKey(id))
-            deliveredMsgMap.get(id).add(sequenceNum);
-        else{
-            List<Integer> list = new ArrayList<>();
-            list.add(sequenceNum);
-            deliveredMsgMap.put(id, list);
-        }
-        mcui.debug("R-Deliver message");
-        fifoCaster.f_receive(id, new MultiMessage(id, messagetext, sequenceNum));
+        // if(deliveredMsgMap.containsKey(id))
+        //     deliveredMsgMap.get(id).add(sequenceNum);
+        // else{
+        //     List<Integer> list = new ArrayList<>();
+        //     list.add(sequenceNum);
+        //     deliveredMsgMap.put(id, list);
+        // }
+        // mcui.debug("R-Deliver message");
+        // fifoCaster.f_receive(id, new MultiMessage(id, messagetext, sequenceNum));
 
         // send out message
         for(int i=0; i < hosts; i++) {
