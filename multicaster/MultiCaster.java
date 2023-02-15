@@ -55,6 +55,12 @@ public class MultiCaster extends Multicaster {
         mcui.debug("Sequence number of message: " + String.valueOf(sequenceNum));
 
         sequenceNum ++;
+        // Test reliable
+        // try {
+		// 	Thread.sleep(1000);
+		// } catch (InterruptedException e) {
+		// 	e.printStackTrace();
+		// }
     }
     
     /**
@@ -79,9 +85,9 @@ public class MultiCaster extends Multicaster {
             }
 
             // deliver the message and save in map
-            // mcui.deliver(peer, ((MultiMessage)message).text);
+            // mcui.deliver(message.getSender(), ((MultiMessage)message).text);
             mcui.debug("R-Deliver message");
-            fifoCaster.f_receive(peer, message);
+            fifoCaster.f_receive(message.getSender(), message);
             if(deliveredMsgMap.containsKey(message.getSender()))
                 deliveredMsgMap.get(message.getSender()).add(((MultiMessage)message).getSequenceNum());
             else{

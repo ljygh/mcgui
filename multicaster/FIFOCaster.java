@@ -47,8 +47,10 @@ public class FIFOCaster{
         else{
             LinkedList<Message> msgList = msgBag.get(sender);
             int seqNum = ((MultiMessage)message).getSequenceNum();
-            for(int i = msgList.size() - 1; i >= 0; i--){
-                if(seqNum < ((MultiMessage)msgList.get(i)).getSequenceNum())
+            for(int i = msgList.size() - 1; i >= -1; i--){
+                if(i == -1)
+                    msgList.add(i + 1, message);
+                else if(seqNum < ((MultiMessage)msgList.get(i)).getSequenceNum())
                     continue;
                 else
                     msgList.add(i + 1, message);
@@ -57,6 +59,9 @@ public class FIFOCaster{
 
         // deliver msg according to nextMap
         LinkedList<Message> msgList = msgBag.get(sender);
+        mcui.debug("Sender: " + sender);
+        mcui.debug("Next msg num of this sender: " + nextMap.get(sender));
+        printMsgBag(sender);
         while(msgList.size() > 0 && ((MultiMessage)msgList.getFirst()).getSequenceNum() == nextMap.get(sender)){
             mcui.deliver(peer, ((MultiMessage)message).text);
             int current_seq = nextMap.get(sender);
@@ -66,6 +71,14 @@ public class FIFOCaster{
             // totalOrderCaster.t_receive(peer, message);
         }
         return;
+    }
+
+    public void printMsgBag(int sender){
+        LinkedList<Message> msgList = msgBag.get(sender);
+        mcui.debug("Print msg bag of the sender:");
+        for(Message msg : msgList){
+            mcui.debug("" + ((MultiMessage)msg).getSequenceNum());
+        }
     }
     
 }
